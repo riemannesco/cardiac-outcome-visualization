@@ -65,4 +65,47 @@ def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[s
 
     else:
         raise ValueError(
-                "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
+            "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
+
+
+def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Count the number of patients in different age ranges.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame with age ranges and their respective counts.
+    '''
+    bins = [(0, 19), (20, 29), (30, 39), (40, 49),
+            (50, 59), (60, 69), (70, 79), (80, 89), (90, None)]
+    labels = ['0-19', '20-29', '30-39', '40-49',
+              '50-59', '60-69', '70-79', '80-89', '90+']
+
+    results_summary = []
+    for i, label in enumerate(labels):
+        min_age, max_age = bins[i]
+        age_group_df = filter_data(dataframe, 'Age', (min_age, max_age))
+        positive_count = 0
+        negative_count = 0
+
+        if not age_group_df.empty:
+            result_counts = count_result(age_group_df)
+            positive_series = result_counts[result_counts['Result']
+                                            == 'positive']['Count']
+            if not positive_series.empty:
+                positive_count = positive_series.iloc[0]
+            negative_series = result_counts[result_counts['Result']
+                                            == 'negative']['Count']
+            if not negative_series.empty:
+                negative_count = negative_series.iloc[0]
+
+        results_summary.append({
+            'Age Range': label,
+            'Positive': positive_count,
+            'Negative': negative_count,
+            'Total': positive_count + negative_count
+        })
+    return pd.DataFrame(results_summary)
+
