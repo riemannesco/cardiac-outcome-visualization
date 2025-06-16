@@ -19,21 +19,21 @@ def count_result(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]) -> pd.DataFrame:
     '''
-    Filtre un DataFrame sur une colonne spécifique, soit par une valeur unique, soit par un intervalle.
+    Filters a DataFrame on a specific column, either by a unique value or by an interval.
 
     Args:
-        dataframe (pd.DataFrame): Le DataFrame à filtrer.
-        column_name (str): Le nom de la colonne sur laquelle appliquer le filtre.
+        dataframe (pd.DataFrame): DataFrame to filter.
+        column_name (str): The name of the column to filter on.
         filter_value (Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]): 
-            - La valeur unique pour le filtre (ex: 'positive', 1, 25.5).
-            - Un tuple (min, max) pour un filtre d'intervalle. 
-              Utilisez None pour une limite ouverte (ex: (50, None) pour >= 50).
+            - The unique value for the filter (ex: 'positive', 1, 25.5).
+            - A tuple (min, max) for an interval filter.
+              Use None for an open limit (e.g., (50, None) for >= 50).
 
     Returns:
-        pd.DataFrame: Un nouveau DataFrame contenant les données filtrées.
+        pd.DataFrame: A new DataFrame containing the filtered data.
 
     Raises:
-        ValueError: Si le nom de la colonne n'existe pas ou si le format du filtre est invalide.
+        ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
     '''
     # Check if the column exists in the DataFrame, not supposed to happen
     if column_name not in dataframe.columns:
