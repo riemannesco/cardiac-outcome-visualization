@@ -68,6 +68,50 @@ def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[s
             "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
 
 
+def get_median_value(dataframe: pd.DataFrame, column_name: str) -> Union[float, None]:
+    '''
+    Calculate the median value of a specified column in the DataFrame for each outcome.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+        column_name (str): The name of the column for which to calculate the median.
+
+    Returns:
+        Union[float, None]: The median value of the specified column for each outcome,
+        or None if the column does not exist or if there are no valid values.
+    '''
+    if column_name not in dataframe.columns:
+        raise ValueError(
+            f"The column '{column_name}' does not exist in the DataFrame.")
+    # Calculate the median for each outcome
+    median_values = dataframe.groupby(
+        'Result')[column_name].median().reset_index()
+    median_values.columns = ['Result', 'Median']
+    return median_values
+
+
+def get_mean_value(dataframe: pd.DataFrame, column_name: str) -> Union[float, None]:
+    '''
+    Calculate the average value of a specified column in the DataFrame for each outcome.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+        column_name (str): The name of the column for which to calculate the median.
+
+    Returns:
+        Union[float, None]: The average value of the specified column for each outcome,
+        or None if the column does not exist or if there are no valid values.
+    '''
+    if column_name not in dataframe.columns:
+        raise ValueError(
+            f"The column '{column_name}' does not exist in the DataFrame.")
+    # Calculate the median for each outcome
+    median_values = dataframe.groupby(
+        'Result')[column_name].mean().reset_index()
+    median_values.columns = ['Result', 'Median']
+    return median_values
+
+
 def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
     '''
     Count the number of patients in different age ranges.
@@ -108,4 +152,3 @@ def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
             'Total': positive_count + negative_count
         })
     return pd.DataFrame(results_summary)
-
