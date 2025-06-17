@@ -138,11 +138,11 @@ def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
         if not age_group_df.empty:
             result_counts = count_result(age_group_df)
             positive_series = result_counts[result_counts['Result']
-                                            == 'positive']['Count']
+                                          == 'positive']['Count']
             if not positive_series.empty:
                 positive_count = positive_series.iloc[0]
             negative_series = result_counts[result_counts['Result']
-                                            == 'negative']['Count']
+                                          == 'negative']['Count']
             if not negative_series.empty:
                 negative_count = negative_series.iloc[0]
 
@@ -224,3 +224,4 @@ def get_troponin_median(dataframe: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: DataFrame with the median Troponin for each outcome.
     '''
     return get_median_value(dataframe, 'Troponin')
+
