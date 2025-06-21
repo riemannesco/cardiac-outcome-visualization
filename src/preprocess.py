@@ -18,15 +18,64 @@ def count_result(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]) -> pd.DataFrame:
+#    '''
+#    Filters a DataFrame on a specific column, either by a unique value or by an interval.
+#
+#    Args:
+#        dataframe (pd.DataFrame): DataFrame to filter.
+#        column_name (str): The name of the column to filter on.
+#        filter_value (Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]): 
+#            - The unique value for the filter (ex: 'positive', 1, 25.5).
+#            - A tuple (min, max) for an interval filter.
+#              Use None for an open limit (e.g., (50, None) for >= 50).
+#
+#    Returns:
+#        pd.DataFrame: A new DataFrame containing the filtered data.
+#
+#    Raises:
+#        ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
+#    '''
+#    # Check if the column exists in the DataFrame, not supposed to happen
+#    if column_name not in dataframe.columns:
+#        raise ValueError(
+#            f"The column'{column_name}' does not exist in the DataFrame.")
+#
+#    # We create a copy to avoid modifying the original DataFrame
+#    df_filtered = dataframe.copy()
+#
+#    if isinstance(filter_value, tuple) and len(filter_value) == 2:
+#        # Filter by range
+#        min_val, max_val = filter_value
+#        if min_val is not None and max_val is not None:
+#            mask = (df_filtered[column_name] >= min_val) & (
+#                df_filtered[column_name] <= max_val)
+#        elif min_val is not None:
+#            mask = df_filtered[column_name] >= min_val
+#        elif max_val is not None:
+#            mask = df_filtered[column_name] <= max_val
+#        else:
+#            # If both are None, return the original DataFrame
+#            return df_filtered
+#
+#        return df_filtered[mask]
+#
+#    elif isinstance(filter_value, (str, int, float)):
+#        # Filter by single value
+#        return df_filtered[df_filtered[column_name] == filter_value]
+#
+#    else:
+#        raise ValueError(
+#            "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
+
     '''
     Filters a DataFrame on a specific column, either by a unique value or by an interval.
 
     Args:
         dataframe (pd.DataFrame): DataFrame to filter.
         column_name (str): The name of the column to filter on.
-        filter_value (Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]): 
+        filter_value (Union[str, int, float, Tuple, List]): 
             - The unique value for the filter (ex: 'positive', 1, 25.5).
-            - A tuple (min, max) for an interval filter.
+            - A tuple or list (min, max) for an interval filter.
               Use None for an open limit (e.g., (50, None) for >= 50).
 
     Returns:
@@ -35,15 +84,15 @@ def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[s
     Raises:
         ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
     '''
-    # Check if the column exists in the DataFrame, not supposed to happen
     if column_name not in dataframe.columns:
         raise ValueError(
             f"The column'{column_name}' does not exist in the DataFrame.")
 
-    # We create a copy to avoid modifying the original DataFrame
     df_filtered = dataframe.copy()
 
-    if isinstance(filter_value, tuple) and len(filter_value) == 2:
+    # --- THIS IS THE LINE TO CHANGE ---
+    # Allow 'filter_value' to be a list or a tuple for range filtering.
+    if isinstance(filter_value, (tuple, list)) and len(filter_value) == 2:
         # Filter by range
         min_val, max_val = filter_value
         if min_val is not None and max_val is not None:
@@ -54,7 +103,6 @@ def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[s
         elif max_val is not None:
             mask = df_filtered[column_name] <= max_val
         else:
-            # If both are None, return the original DataFrame
             return df_filtered
 
         return df_filtered[mask]
@@ -65,7 +113,7 @@ def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[s
 
     else:
         raise ValueError(
-            "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
+            "The format of 'filter_value' is invalid. Use a unique value or a tuple/list (min, max).")
 
 
 def get_median_value(dataframe: pd.DataFrame, column_name: str) -> Union[float, None]:
