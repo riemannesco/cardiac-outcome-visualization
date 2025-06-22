@@ -1,0 +1,162 @@
+
+
+
+
+
+:root {
+    --dd-bg: white;                 
+    --dd-text: #1e293b;             
+    --dd-border: #d1d5db;           
+    --dd-option-hover-bg: #0ea5e9;  
+    --dd-option-hover-text: white;  
+}
+
+
+.dark {
+    --dd-bg: #1e293b;                 
+    --dd-text: #cbd5e1;             
+    --dd-border: #475569;           
+    --dd-option-hover-bg: #0ea5e9;  
+    --dd-option-hover-text: white;
+}
+
+
+
+
+
+.card { 
+    background-color: white; 
+    padding: 1.5rem; 
+    border-radius: 0.75rem; 
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); 
+    margin-bottom: 2rem; 
+}
+
+.dark .card { 
+    background-color: #1e293b; 
+}
+
+.card-title { 
+    font-size: 1.25rem; 
+    font-weight: 700; 
+    color: #1e293b; 
+    display: flex; 
+    align-items: center; 
+}
+
+.dark .card-title { 
+    color: white; 
+}
+
+.card-filters { 
+    display: grid; 
+    grid-template-columns: repeat(1, minmax(0, 1fr)); 
+    gap: 1.5rem; 
+    border-top-width: 1px; 
+    border-color: #e2e8f0; 
+    padding-top: 1.5rem; 
+    margin-top: 1.5rem; 
+}
+
+@media (min-width: 768px) {
+    .card-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.dark .card-filters { 
+    border-color: #334155; 
+}
+
+.card-filters label { 
+    font-weight: 600; 
+    color: #475569; 
+    display: block; 
+    margin-bottom: 0.5rem; 
+}
+
+.dark .card-filters label { 
+    color: #94a3b8; 
+}
+
+.card-insight { 
+    font-size: 0.875rem; 
+    color: #475569; 
+    background-color: #f8fafc; 
+    padding: 0.75rem; 
+    margin-top: 1rem; 
+    border-radius: 0.5rem; 
+    min-height: 40px;
+    border: 1px solid #e2e8f0; 
+}
+
+.dark .card-insight { 
+    background-color: #334155; 
+    color: #cbd5e1; 
+    border-color: #475569; 
+}
+
+.tooltip-container { 
+    position: relative; 
+    display: inline-block; 
+}
+
+.tooltip-text { 
+    visibility: hidden; 
+    width: 220px; 
+    background-color: #334155; 
+    color: #fff; 
+    text-align: center; 
+    border-radius: 6px; 
+    padding: 5px; 
+    position: absolute; 
+    z-index: 1; 
+    bottom: 125%; 
+    left: 50%; 
+    margin-left: -110px; 
+    opacity: 0; 
+    transition: opacity 0.3s; 
+    font-size: 0.75rem; 
+    font-weight: 400;
+}
+
+.tooltip-container:hover .tooltip-text { 
+    visibility: visible; 
+    opacity: 1; 
+}
+
+
+
+
+.Select-control, .Select__control {
+    background-color: var(--dd-bg) !important;
+    border: 1px solid var(--dd-border) !important;
+}
+
+
+.Select-value-label, .Select__single-value {
+    color: var(--dd-text) !important;
+}
+
+
+.Select-menu-outer, .Select__menu {
+    background-color: var(--dd-bg) !important;
+    border: 1px solid var(--dd-border) !important;
+}
+
+
+.Select-option, .Select__option {
+    background-color: var(--dd-bg) !important;
+    color: var(--dd-text) !important;
+}
+
+
+.Select-option.is-focused, .Select__option--is-focused {
+    background-color: var(--dd-option-hover-bg) !important;
+    color: var(--dd-option-hover-text) !important;
+}
+
+
+.Select-option.is-selected {
+    background-color: rgba(14, 165, 233, 0.1) !important;
+}
