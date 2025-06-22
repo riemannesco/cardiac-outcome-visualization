@@ -39,55 +39,6 @@ def count_result(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]) -> pd.DataFrame:
-#    '''
-#    Filters a DataFrame on a specific column, either by a unique value or by an interval.
-#
-#    Args:
-#        dataframe (pd.DataFrame): DataFrame to filter.
-#        column_name (str): The name of the column to filter on.
-#        filter_value (Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]): 
-#            - The unique value for the filter (ex: 'positive', 1, 25.5).
-#            - A tuple (min, max) for an interval filter.
-#              Use None for an open limit (e.g., (50, None) for >= 50).
-#
-#    Returns:
-#        pd.DataFrame: A new DataFrame containing the filtered data.
-#
-#    Raises:
-#        ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
-#    '''
-#    # Check if the column exists in the DataFrame, not supposed to happen
-#    if column_name not in dataframe.columns:
-#        raise ValueError(
-#            f"The column'{column_name}' does not exist in the DataFrame.")
-#
-#    # We create a copy to avoid modifying the original DataFrame
-#    df_filtered = dataframe.copy()
-#
-#    if isinstance(filter_value, tuple) and len(filter_value) == 2:
-#        # Filter by range
-#        min_val, max_val = filter_value
-#        if min_val is not None and max_val is not None:
-#            mask = (df_filtered[column_name] >= min_val) & (
-#                df_filtered[column_name] <= max_val)
-#        elif min_val is not None:
-#            mask = df_filtered[column_name] >= min_val
-#        elif max_val is not None:
-#            mask = df_filtered[column_name] <= max_val
-#        else:
-#            # If both are None, return the original DataFrame
-#            return df_filtered
-#
-#        return df_filtered[mask]
-#
-#    elif isinstance(filter_value, (str, int, float)):
-#        # Filter by single value
-#        return df_filtered[df_filtered[column_name] == filter_value]
-#
-#    else:
-#        raise ValueError(
-#            "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
-
     '''
     Filters a DataFrame on a specific column, either by a unique value or by an interval.
 
@@ -196,6 +147,52 @@ def get_results_by_range(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
             'Positive': positive_count,
             'Negative': negative_count,
             'Total': positive_count + negative_count
+        })
+
+    return pd.DataFrame(results_summary)
+
+
+def get_percent_by_range(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
+    '''
+    Calculate the percentage of positive and negative results in different ranges of a specified column.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+        column (str): The column to filter by range.
+
+    Returns:
+        pd.DataFrame: DataFrame with ranges and their respective percentages of positive and negative results.
+    '''
+    if column not in bins_labels:
+        raise ValueError(f"Column '{column}' is not supported for range filtering.")
+
+    bins, labels = bins_labels[column]
+    results_summary = []
+
+    for i, label in enumerate(labels):
+        min_val, max_val = bins[i]
+        filtered_df = filter_data(dataframe, column, (min_val, max_val))
+        positive_count = 0
+        negative_count = 0
+
+        if not filtered_df.empty:
+            result_counts = count_result(filtered_df)
+            positive_series = result_counts[result_counts['Result'] == 'positive']['Count']
+            if not positive_series.empty:
+                positive_count = positive_series.iloc[0]
+            negative_series = result_counts[result_counts['Result'] == 'negative']['Count']
+            if not negative_series.empty:
+                negative_count = negative_series.iloc[0]
+
+        total = positive_count + negative_count
+        positive_percentage = (positive_count / total) * 100 if total > 0 else 0
+        negative_percentage = (negative_count / total) * 100 if total > 0 else 0
+
+        results_summary.append({
+            'Range': label,
+            'Positive_Percentage': positive_percentage,
+            'Negative_Percentage': negative_percentage,
+            'Total': total
         })
 
     return pd.DataFrame(results_summary)

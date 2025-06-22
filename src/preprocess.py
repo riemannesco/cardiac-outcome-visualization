@@ -16,6 +16,19 @@ def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
     return utils.get_results_by_range(dataframe, 'Age')
 
 
+def get_percent_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Calculate the percentage of patients in each age range.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame with age ranges and their respective percentages.
+    '''
+    return utils.get_percent_by_range(dataframe, 'Age')
+
+
 def get_heart_rate_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     '''
     Calculate the median heart rate for each outcome.
@@ -124,3 +137,33 @@ def get_bloodsugar_systolic_heatmap_data(dataframe: pd.DataFrame) -> pd.DataFram
         pd.DataFrame: DataFrame with counts for each combination of blood pressure and blood sugar ranges.
     '''
     return utils.get_heatmap_data(dataframe, 'Systolic blood pressure', 'Blood sugar')
+
+
+# Commentaire à supprimer: Permet de faire le graphe de la cinquième vis
+def get_mean_values_by_result(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Calculate the average value of each column in the DataFrame for each outcome.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the average values of each column for each outcome.
+    '''
+    mean_values_dict = {}
+
+    for column_name in dataframe.columns:
+        if column_name in ['Result', 'Gender']:
+            continue  # Skip the 'Result' and 'Gender' column itself
+
+        # Calculate the mean for each outcome
+        mean_values = dataframe.groupby('Result')[column_name].mean().reset_index()
+        mean_values.columns = ['Result', column_name]
+
+        # Store the mean values in the dictionary
+        mean_values_dict[column_name] = mean_values.set_index('Result')[column_name]
+
+    # Combine all the mean values into a single DataFrame
+    mean_values_df = pd.DataFrame(mean_values_dict)
+
+    return mean_values_df.reset_index()
