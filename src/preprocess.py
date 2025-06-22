@@ -22,7 +22,7 @@ def get_percent_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     Args:
         dataframe (pd.DataFrame): The DataFrame containing the dataset.
-
+        
     Returns:
         pd.DataFrame: DataFrame with age ranges and their respective percentages.
     '''
