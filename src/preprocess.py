@@ -1,163 +1,5 @@
 import pandas as pd
-from typing import Union, Tuple
-
-
-def count_result(dataframe: pd.DataFrame) -> pd.DataFrame:
-    '''
-    Count the number of occurences of postive and negative outcomes in the dataset.
-
-    Args:
-        dataframe (pd.DataFrame): The DataFrame containing the dataset.
-    Returns:
-        pd.DataFrame: DataFrame with the counts of positive and negative
-        outcomes instead of the column 'Result'.
-    '''
-    result_counts = dataframe['Result'].value_counts().reset_index()
-    result_counts.columns = ['Result', 'Count']
-    return result_counts
-
-
-def filter_data(dataframe: pd.DataFrame, column_name: str, filter_value: Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]) -> pd.DataFrame:
-#    '''
-#    Filters a DataFrame on a specific column, either by a unique value or by an interval.
-#
-#    Args:
-#        dataframe (pd.DataFrame): DataFrame to filter.
-#        column_name (str): The name of the column to filter on.
-#        filter_value (Union[str, int, float, Tuple[Union[int, float, None], Union[int, float, None]]]): 
-#            - The unique value for the filter (ex: 'positive', 1, 25.5).
-#            - A tuple (min, max) for an interval filter.
-#              Use None for an open limit (e.g., (50, None) for >= 50).
-#
-#    Returns:
-#        pd.DataFrame: A new DataFrame containing the filtered data.
-#
-#    Raises:
-#        ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
-#    '''
-#    # Check if the column exists in the DataFrame, not supposed to happen
-#    if column_name not in dataframe.columns:
-#        raise ValueError(
-#            f"The column'{column_name}' does not exist in the DataFrame.")
-#
-#    # We create a copy to avoid modifying the original DataFrame
-#    df_filtered = dataframe.copy()
-#
-#    if isinstance(filter_value, tuple) and len(filter_value) == 2:
-#        # Filter by range
-#        min_val, max_val = filter_value
-#        if min_val is not None and max_val is not None:
-#            mask = (df_filtered[column_name] >= min_val) & (
-#                df_filtered[column_name] <= max_val)
-#        elif min_val is not None:
-#            mask = df_filtered[column_name] >= min_val
-#        elif max_val is not None:
-#            mask = df_filtered[column_name] <= max_val
-#        else:
-#            # If both are None, return the original DataFrame
-#            return df_filtered
-#
-#        return df_filtered[mask]
-#
-#    elif isinstance(filter_value, (str, int, float)):
-#        # Filter by single value
-#        return df_filtered[df_filtered[column_name] == filter_value]
-#
-#    else:
-#        raise ValueError(
-#            "The format of 'filter_value' is invalid. Use a unique value or a tuple (min, max).")
-
-    '''
-    Filters a DataFrame on a specific column, either by a unique value or by an interval.
-
-    Args:
-        dataframe (pd.DataFrame): DataFrame to filter.
-        column_name (str): The name of the column to filter on.
-        filter_value (Union[str, int, float, Tuple, List]): 
-            - The unique value for the filter (ex: 'positive', 1, 25.5).
-            - A tuple or list (min, max) for an interval filter.
-              Use None for an open limit (e.g., (50, None) for >= 50).
-
-    Returns:
-        pd.DataFrame: A new DataFrame containing the filtered data.
-
-    Raises:
-        ValueError: If the column does not exist in the DataFrame or if the filter format is invalid.
-    '''
-    if column_name not in dataframe.columns:
-        raise ValueError(
-            f"The column'{column_name}' does not exist in the DataFrame.")
-
-    df_filtered = dataframe.copy()
-
-    # --- THIS IS THE LINE TO CHANGE ---
-    # Allow 'filter_value' to be a list or a tuple for range filtering.
-    if isinstance(filter_value, (tuple, list)) and len(filter_value) == 2:
-        # Filter by range
-        min_val, max_val = filter_value
-        if min_val is not None and max_val is not None:
-            mask = (df_filtered[column_name] >= min_val) & (
-                df_filtered[column_name] <= max_val)
-        elif min_val is not None:
-            mask = df_filtered[column_name] >= min_val
-        elif max_val is not None:
-            mask = df_filtered[column_name] <= max_val
-        else:
-            return df_filtered
-
-        return df_filtered[mask]
-
-    elif isinstance(filter_value, (str, int, float)):
-        # Filter by single value
-        return df_filtered[df_filtered[column_name] == filter_value]
-
-    else:
-        raise ValueError(
-            "The format of 'filter_value' is invalid. Use a unique value or a tuple/list (min, max).")
-
-
-def get_median_value(dataframe: pd.DataFrame, column_name: str) -> Union[float, None]:
-    '''
-    Calculate the median value of a specified column in the DataFrame for each outcome.
-
-    Args:
-        dataframe (pd.DataFrame): The DataFrame containing the dataset.
-        column_name (str): The name of the column for which to calculate the median.
-
-    Returns:
-        Union[float, None]: The median value of the specified column for each outcome,
-        or None if the column does not exist or if there are no valid values.
-    '''
-    if column_name not in dataframe.columns:
-        raise ValueError(
-            f"The column '{column_name}' does not exist in the DataFrame.")
-    # Calculate the median for each outcome
-    median_values = dataframe.groupby(
-        'Result')[column_name].median().reset_index()
-    median_values.columns = ['Result', 'Median']
-    return median_values
-
-
-def get_mean_value(dataframe: pd.DataFrame, column_name: str) -> Union[float, None]:
-    '''
-    Calculate the average value of a specified column in the DataFrame for each outcome.
-
-    Args:
-        dataframe (pd.DataFrame): The DataFrame containing the dataset.
-        column_name (str): The name of the column for which to calculate the median.
-
-    Returns:
-        Union[float, None]: The average value of the specified column for each outcome,
-        or None if the column does not exist or if there are no valid values.
-    '''
-    if column_name not in dataframe.columns:
-        raise ValueError(
-            f"The column '{column_name}' does not exist in the DataFrame.")
-    # Calculate the median for each outcome
-    median_values = dataframe.groupby(
-        'Result')[column_name].mean().reset_index()
-    median_values.columns = ['Result', 'Median']
-    return median_values
+import utils
 
 
 # Commentaire à supprimer: Permet de faire le graphe de la première vis
@@ -171,39 +13,22 @@ def get_results_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with age ranges and their respective counts.
     '''
-    bins = [(0, 19), (20, 29), (30, 39), (40, 49),
-            (50, 59), (60, 69), (70, 79), (80, 89), (90, None)]
-    labels = ['0-19', '20-29', '30-39', '40-49',
-              '50-59', '60-69', '70-79', '80-89', '90+']
-
-    results_summary = []
-    for i, label in enumerate(labels):
-        min_age, max_age = bins[i]
-        age_group_df = filter_data(dataframe, 'Age', (min_age, max_age))
-        positive_count = 0
-        negative_count = 0
-
-        if not age_group_df.empty:
-            result_counts = count_result(age_group_df)
-            positive_series = result_counts[result_counts['Result']
-                                          == 'positive']['Count']
-            if not positive_series.empty:
-                positive_count = positive_series.iloc[0]
-            negative_series = result_counts[result_counts['Result']
-                                          == 'negative']['Count']
-            if not negative_series.empty:
-                negative_count = negative_series.iloc[0]
-
-        results_summary.append({
-            'Age Range': label,
-            'Positive': positive_count,
-            'Negative': negative_count,
-            'Total': positive_count + negative_count
-        })
-    return pd.DataFrame(results_summary)
+    return utils.get_results_by_range(dataframe, 'Age')
 
 
-# Commentaire à supprimer: Permet de faire le graphe de la deuxième vis
+def get_percent_by_age_range(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Calculate the percentage of patients in each age range.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+        
+    Returns:
+        pd.DataFrame: DataFrame with age ranges and their respective percentages.
+    '''
+    return utils.get_percent_by_range(dataframe, 'Age')
+
+
 def get_heart_rate_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     '''
     Calculate the median heart rate for each outcome.
@@ -214,7 +39,7 @@ def get_heart_rate_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with the median heart rate for each outcome.
     '''
-    return get_median_value(dataframe, 'Heart rate')
+    return utils.get_median_value(dataframe, 'Heart rate')
 
 
 def get_blood_sugar_median(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -227,10 +52,10 @@ def get_blood_sugar_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with the median blood sugar for each outcome.
     '''
-    return get_median_value(dataframe, 'Blood sugar')
+    return utils.get_median_value(dataframe, 'Blood sugar')
 
 
-# Commentaire à supprimer: Permet de faire le graphe de la troisième vis
+# Commentaire à supprimer: Permet de faire le graphe de la deuxième vis
 def filter_systolic_diastolic_blood_pressure(dataframe: pd.DataFrame) -> pd.DataFrame:
     '''
     Filter the columns of the dataframe to only include systolic and diastolic blood pressure and result.
@@ -247,7 +72,7 @@ def filter_systolic_diastolic_blood_pressure(dataframe: pd.DataFrame) -> pd.Data
     return filtered_df
 
 
-# Commentaire à supprimer: Permet de faire le graphe de la quatrième vis
+# Commentaire à supprimer: Permet de faire le graphe de la troisième vis
 def get_ckmb_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     '''
     Calculate the median CK-MB for each outcome.
@@ -258,7 +83,7 @@ def get_ckmb_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with the median CK-MB for each outcome.
     '''
-    return get_median_value(dataframe, 'CK-MB')
+    return utils.get_median_value(dataframe, 'CK-MB')
 
 
 def get_troponin_median(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -271,5 +96,74 @@ def get_troponin_median(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with the median Troponin for each outcome.
     '''
-    return get_median_value(dataframe, 'Troponin')
+    return utils.get_median_value(dataframe, 'Troponin')
 
+
+# Commentaire à supprimer: Permet de faire le graphe de la quatrième vis
+def get_results_by_systolic_blood_pressure_range(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Count the number of patients in different ranges of systolic blood pressure.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame with blood pressure ranges and its counts.
+    '''
+    return utils.get_results_by_range(dataframe, 'Systolic blood pressure')
+
+
+def get_results_by_blood_sugar_range(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Count the number of patients in different ranges of blood sugar.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame with blood sugar ranges and their respective counts.
+    '''
+    return utils.get_results_by_range(dataframe, 'Blood sugar')
+
+
+def get_bloodsugar_systolic_heatmap_data(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Count the number of patients in different ranges of 'Systolic blood pressure' and 'Blood sugar'.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame with counts for each combination of blood pressure and blood sugar ranges.
+    '''
+    return utils.get_heatmap_data(dataframe, 'Systolic blood pressure', 'Blood sugar')
+
+
+# Commentaire à supprimer: Permet de faire le graphe de la cinquième vis
+def get_mean_values_by_result(dataframe: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Calculate the average value of each column in the DataFrame for each outcome.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the dataset.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the average values of each column for each outcome.
+    '''
+    mean_values_dict = {}
+
+    for column_name in dataframe.columns:
+        if column_name in ['Result', 'Gender']:
+            continue  # Skip the 'Result' and 'Gender' column itself
+
+        # Calculate the mean for each outcome
+        mean_values = dataframe.groupby('Result')[column_name].mean().reset_index()
+        mean_values.columns = ['Result', column_name]
+
+        # Store the mean values in the dictionary
+        mean_values_dict[column_name] = mean_values.set_index('Result')[column_name]
+
+    # Combine all the mean values into a single DataFrame
+    mean_values_df = pd.DataFrame(mean_values_dict)
+
+    return mean_values_df.reset_index()

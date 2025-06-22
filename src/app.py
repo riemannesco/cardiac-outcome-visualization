@@ -67,6 +67,7 @@ def create_visualization_card(card_id, title, tooltip_text, graph_id, insight_id
 # ==============================================================================
 # 3. FONCTIONS DE CRÉATION DE GRAPHIQUES
 # ==============================================================================
+# (Functions remain the same as the previous version, just ensuring English labels)
 
 def create_age_gender_chart(df):
     """Crée le graphique de distribution par âge et genre."""
