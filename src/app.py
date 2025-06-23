@@ -13,14 +13,15 @@ import pandas as pd
 import numpy as np
 import os
 
-# --- Importation des modules locaux ---
 try:
     from utils import filter_data
     from preprocess import get_bloodsugar_systolic_heatmap_data, get_mean_values_by_result
 except ImportError:
-    print("ERREUR CRITIQUE: Impossible d'importer les modules `preprocess.py` ou `utils.py`. Assurez-vous qu'ils sont dans le même dossier.")
-    # Fallback pour éviter un crash au démarrage
-    def filter_data(df, col, val): return pd.DataFrame()
+    print("AVERTISSEMENT: L'importation depuis 'preprocess.py' ou 'utils.py' a échoué.")
+    def filter_data(df, col, val):
+        if df.empty: return pd.DataFrame()
+        if isinstance(val, (tuple, list)): return df[(df[col] >= val[0]) & (df[col] <= val[1])]
+        else: return df[df[col] == val]
     def get_bloodsugar_systolic_heatmap_data(df): return pd.DataFrame()
     def get_mean_values_by_result(df): return pd.DataFrame()
 
@@ -37,7 +38,7 @@ try:
         df_full['gender'] = df_full['gender'].map({0: 'Female', 1: 'Male'})
     df_full['outcome'] = df_full['outcome'].str.capitalize()
 except FileNotFoundError:
-    print("ERREUR: Le fichier CSV 'Medicaldataset.csv' est introuvable dans le dossier 'assets/data'.")
+    print("ERREUR: Le fichier CSV 'Medicaldataset.csv' est introuvable.")
     df_full = pd.DataFrame()
 
 initial_age_range = [df_full['age'].min(), df_full['age'].max()] if not df_full.empty else [20, 80]
@@ -67,17 +68,16 @@ def create_visualization_card(card_id, title, tooltip_text, graph_id, insight_id
 # 3. FONCTIONS DE CRÉATION DE GRAPHIQUES
 # ==============================================================================
 def create_age_gender_chart(df):
-    """Génère le graphique de distribution par âge et genre."""
     if df.empty: return go.Figure().update_layout(title='No data to display', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    bins, labels = [14, 30, 45, 60, 75, 90, float('inf')], ['14-29', '30-44', '45-59', '60-74', '75-89', '90+']
+    bins = [14, 30, 45, 60, 75, 90, float('inf')]; labels = ['14-29', '30-44', '45-59', '60-74', '75-89', '90+']
     df_copy = df.copy(); df_copy.loc[:, 'age_group'] = pd.cut(df_copy['age'], bins=bins, labels=labels, right=False)
     fig = make_subplots(rows=1, cols=2, subplot_titles=('Male', 'Female'), x_title='Age Group')
     legend_added = {'Positive': False, 'Negative': False}
     for i, gender in enumerate(['Male', 'Female']):
-        col, gender_df = i + 1, df_copy[df_copy['gender'] == gender]
+        col = i + 1; gender_df = df_copy[df_copy['gender'] == gender]
         if gender_df.empty: continue
         counts = gender_df.groupby(['age_group', 'outcome'], observed=True).size().reset_index(name='count')
-        positive_data, negative_data = counts[counts['outcome'] == 'Positive'], counts[counts['outcome'] == 'Negative']
+        positive_data = counts[counts['outcome'] == 'Positive']; negative_data = counts[counts['outcome'] == 'Negative']
         if not positive_data.empty:
             fig.add_trace(go.Bar(x=positive_data['age_group'], y=positive_data['count'], name='Positive', marker_color='#f97316', legendgroup='Positive', showlegend=not legend_added['Positive']), row=1, col=col)
             legend_added['Positive'] = True
@@ -88,14 +88,12 @@ def create_age_gender_chart(df):
     return fig
 
 def create_blood_pressure_chart(df):
-    """Génère le nuage de points pour la pression artérielle."""
     if df.empty: return go.Figure().update_layout(title='No data to display', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     fig = px.scatter(df, x='systolic_bp', y='diastolic_bp', color='outcome', labels={'systolic_bp': 'Systolic BP (mmHg)', 'diastolic_bp': 'Diastolic BP (mmHg)'}, color_discrete_map={'Positive': '#f97316', 'Negative': '#0ea5e9'})
     fig.add_hline(y=90, line_dash="dash", line_color="gray"); fig.add_vline(x=140, line_dash="dash", line_color="gray")
     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=20), legend_title_text='Outcome'); return fig
 
 def create_biomarkers_chart(df):
-    """Génère le graphique en barres des biomarqueurs."""
     if df.empty: return go.Figure().update_layout(title='No data to display', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     biomarkers_median = df.groupby('outcome')[['ck_mb', 'troponin']].median().reset_index()
     biomarkers_melted = biomarkers_median.melt(id_vars='outcome', value_vars=['ck_mb', 'troponin'], var_name='biomarker', value_name='median_value')
@@ -103,7 +101,6 @@ def create_biomarkers_chart(df):
     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=20), legend_title_text='Outcome'); return fig
 
 def create_heatmap_chart(df):
-    """Génère la heatmap Pression Systolique vs. Glycémie."""
     heatmap_long_df = get_bloodsugar_systolic_heatmap_data(df)
     if heatmap_long_df.empty: return go.Figure().update_layout(title='No data for this selection', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     try:
@@ -115,44 +112,41 @@ def create_heatmap_chart(df):
         return go.Figure().update_layout(title='Error processing heatmap data', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
 def create_radar_chart(df):
-    """Génère le graphique radar comparant les profils moyens."""
     if df.empty or len(df['outcome'].unique()) < 2:
         return go.Figure().update_layout(title='Not enough data for comparison (requires both outcomes)', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    
     mean_df = get_mean_values_by_result(df)
     if mean_df.empty or len(mean_df) < 2:
         return go.Figure().update_layout(title='Not enough data for comparison', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    
     numeric_cols = [col for col in mean_df.columns if col != 'outcome']
     scaled_df = mean_df.copy()
-    
     for col in numeric_cols:
         min_val, max_val = df_full[col].min(), df_full[col].max()
         range_val = max_val - min_val
         if range_val > 0: scaled_df[col] = (scaled_df[col] - min_val) / range_val
         else: scaled_df[col] = 0.5
-    
     categories = [col.replace('_', ' ').title() for col in numeric_cols]
     fig = go.Figure()
     colors = {'Positive': '#f97316', 'Negative': '#0ea5e9'}
     fill_colors = {'Positive': 'rgba(249, 115, 22, 0.4)', 'Negative': 'rgba(14, 165, 233, 0.4)'}
-
     for index, row in scaled_df.iterrows():
         outcome = row['outcome']
         values = row[numeric_cols].values.tolist()
         closed_values = values + [values[0]]
         closed_categories = categories + [categories[0]]
         fig.add_trace(go.Scatterpolar(r=closed_values, theta=closed_categories, fill='toself', name=outcome, line=dict(color=colors.get(outcome)), fillcolor=fill_colors.get(outcome)))
-
     fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 1])), showlegend=True, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=80, b=40, l=40, r=40), legend_title_text='Outcome')
     return fig
 
 # ==============================================================================
-# 4. INITIALISATION ET MISE EN PAGE DE L'APPLICATION
+# 4. INITIALISATION DE L'APPLICATION DASH
 # ==============================================================================
 app = Dash(__name__, external_scripts=['https://cdn.tailwindcss.com?plugins=forms', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'])
+server = app.server  # <-- LIGNE AJOUTÉE POUR LE DÉPLOIEMENT
 app.title = "Cardiac Risk Dashboard"
 
+# ==============================================================================
+# 5. MISE EN PAGE DE L'APPLICATION
+# ==============================================================================
 app.layout = html.Div(className='bg-slate-50 text-slate-800', children=[
     dcc.Store(id='filter-store', storage_type='session', data={'age_range': initial_age_range, 'gender': initial_gender}),
     html.Header(className='bg-white shadow-md sticky top-0 z-50', children=[
@@ -184,7 +178,7 @@ app.layout = html.Div(className='bg-slate-50 text-slate-800', children=[
 ])
 
 # ==============================================================================
-# 5. CALLBACKS
+# 6. CALLBACKS
 # ==============================================================================
 clientside_callback("function(n,data){ if(n>0) localStorage.setItem('cardiac_dashboard_filters', JSON.stringify(data)); return ''; }", Output('save-button', 'data-saved'), Input('save-button', 'n_clicks'), State('filter-store', 'data'), prevent_initial_call=True)
 clientside_callback("function(n){ if(n>0){ const d=localStorage.getItem('cardiac_dashboard_filters'); if(d) return JSON.parse(d); } return window.dash_clientside.no_update; }", Output('filter-store', 'data', allow_duplicate=True), Input('load-button', 'n_clicks'), prevent_initial_call=True)
@@ -200,14 +194,12 @@ clientside_callback("function(n){ if(n>0){ const d=localStorage.getItem('cardiac
     prevent_initial_call=True
 )
 def sync_filters(store_data, age1, age2, age3, age4, age5, gen1, gen2, gen3, gen4, gen5, sync_on):
-    """Gère la synchronisation des filtres entre toutes les cartes."""
     ctx = callback_context
     if not ctx.triggered: return (no_update,) * 11
     trigger_id_str = ctx.triggered[0]['prop_id'].split('.')[0]
     
     if trigger_id_str == 'filter-store':
-        age = store_data.get('age_range', initial_age_range)
-        gender = store_data.get('gender', initial_gender)
+        age = store_data.get('age_range', initial_age_range); gender = store_data.get('gender', initial_gender)
         return (no_update, *([age]*5), *([gender]*5))
 
     if 'sync' in sync_on:
@@ -223,9 +215,9 @@ def sync_filters(store_data, age1, age2, age3, age4, age5, gen1, gen2, gen3, gen
     new_store_data = {'age_range': age1, 'gender': gen1}
     return (new_store_data,) + (no_update,) * 10
 
+# Callbacks for each visualization card
 @app.callback(Output('age-gender-chart', 'figure'), Output('insight-demographics', 'children'), Input('age-slider-1', 'value'), Input('gender-dropdown-1', 'value'))
 def update_demographics(age_range, gender_value):
-    """Met à jour le graphique et l'insight pour les données démographiques."""
     df = filter_data(df_full, 'age', age_range)
     if gender_value != 'All': df = filter_data(df, 'gender', gender_value)
     insight = "No significant trend identified."; 
@@ -235,12 +227,11 @@ def update_demographics(age_range, gender_value):
             bins = [14, 30, 45, 60, 75, 90, float('inf')]; labels = ['14-29', '30-44', '45-59', '60-74', '75-89', '90+']
             pos_cases.loc[:, 'age_group'] = pd.cut(pos_cases['age'], bins=bins, labels=labels, right=False)
             peak_group = pos_cases.groupby(['age_group', 'gender'], observed=True).size()
-            if not peak_group.empty: insight = f"Insight: Highest number of positive cases in the {peak_group.idxmax()[0]} age group for {peak_group.idxmax()[1]}s."
+            if not peak_group.empty: insight = f"Insight: Highest number of positive cases is in the {peak_group.idxmax()[0]} age group for {peak_group.idxmax()[1]}s."
     return create_age_gender_chart(df), insight
 
 @app.callback(Output('blood-pressure-chart', 'figure'), Output('insight-bp', 'children'), Input('age-slider-2', 'value'), Input('gender-dropdown-2', 'value'))
 def update_blood_pressure(age_range, gender_value):
-    """Met à jour le graphique et l'insight pour la pression artérielle."""
     df = filter_data(df_full, 'age', age_range)
     if gender_value != 'All': df = filter_data(df, 'gender', gender_value)
     insight = "Not enough data for a trend."
@@ -253,7 +244,6 @@ def update_blood_pressure(age_range, gender_value):
 
 @app.callback(Output('biomarkers-chart', 'figure'), Output('insight-biomarkers', 'children'), Input('age-slider-3', 'value'), Input('gender-dropdown-3', 'value'))
 def update_biomarkers(age_range, gender_value):
-    """Met à jour le graphique et l'insight pour les biomarqueurs."""
     df = filter_data(df_full, 'age', age_range)
     if gender_value != 'All': df = filter_data(df, 'gender', gender_value)
     insight = "Not enough data to compare."
@@ -266,7 +256,6 @@ def update_biomarkers(age_range, gender_value):
 
 @app.callback(Output('heatmap-chart', 'figure'), Output('insight-heatmap', 'children'), Input('age-slider-4', 'value'), Input('gender-dropdown-4', 'value'))
 def update_heatmap(age_range, gender_value):
-    """Met à jour la heatmap."""
     df = filter_data(df_full, 'age', age_range)
     if gender_value != 'All': df = filter_data(df, 'gender', gender_value)
     insight = "Insight: Patient concentration by blood sugar and systolic BP."
@@ -274,7 +263,6 @@ def update_heatmap(age_range, gender_value):
 
 @app.callback(Output('radar-chart', 'figure'), Output('insight-profiles', 'children'), Input('age-slider-5', 'value'), Input('gender-dropdown-5', 'value'))
 def update_radar_chart(age_range, gender_value):
-    """Met à jour le graphique radar."""
     df = filter_data(df_full, 'age', age_range)
     if gender_value != 'All': df = filter_data(df, 'gender', gender_value)
     insight = "Insight: Compares the 'average' patient profile for each outcome."
