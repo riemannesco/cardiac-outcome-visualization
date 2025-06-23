@@ -2,28 +2,6 @@
 
 
 
-
-:root {
-    --dd-bg: white;                 
-    --dd-text: #1e293b;             
-    --dd-border: #d1d5db;           
-    --dd-option-hover-bg: #0ea5e9;  
-    --dd-option-hover-text: white;  
-}
-
-
-.dark {
-    --dd-bg: #1e293b;                 
-    --dd-text: #cbd5e1;             
-    --dd-border: #475569;           
-    --dd-option-hover-bg: #0ea5e9;  
-    --dd-option-hover-text: white;
-}
-
-
-
-
-
 .card { 
     background-color: white; 
     padding: 1.5rem; 
@@ -32,20 +10,12 @@
     margin-bottom: 2rem; 
 }
 
-.dark .card { 
-    background-color: #1e293b; 
-}
-
 .card-title { 
     font-size: 1.25rem; 
     font-weight: 700; 
     color: #1e293b; 
     display: flex; 
     align-items: center; 
-}
-
-.dark .card-title { 
-    color: white; 
 }
 
 .card-filters { 
@@ -64,19 +34,11 @@
     }
 }
 
-.dark .card-filters { 
-    border-color: #334155; 
-}
-
 .card-filters label { 
     font-weight: 600; 
     color: #475569; 
     display: block; 
     margin-bottom: 0.5rem; 
-}
-
-.dark .card-filters label { 
-    color: #94a3b8; 
 }
 
 .card-insight { 
@@ -90,11 +52,6 @@
     border: 1px solid #e2e8f0; 
 }
 
-.dark .card-insight { 
-    background-color: #334155; 
-    color: #cbd5e1; 
-    border-color: #475569; 
-}
 
 .tooltip-container { 
     position: relative; 
@@ -125,38 +82,22 @@
     opacity: 1; 
 }
 
-
-
-
-.Select-control, .Select__control {
-    background-color: var(--dd-bg) !important;
-    border: 1px solid var(--dd-border) !important;
+.Select-control {
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
 }
-
-
-.Select-value-label, .Select__single-value {
-    color: var(--dd-text) !important;
+.Select-value-label, .Select-arrow {
+    color: #1e293b !important;
 }
-
-
-.Select-menu-outer, .Select__menu {
-    background-color: var(--dd-bg) !important;
-    border: 1px solid var(--dd-border) !important;
+.Select-menu-outer {
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
 }
-
-
-.Select-option, .Select__option {
-    background-color: var(--dd-bg) !important;
-    color: var(--dd-text) !important;
+.Select-option {
+    background-color: white !important;
+    color: #1e293b !important;
 }
-
-
-.Select-option.is-focused, .Select__option--is-focused {
-    background-color: var(--dd-option-hover-bg) !important;
-    color: var(--dd-option-hover-text) !important;
-}
-
-
-.Select-option.is-selected {
-    background-color: rgba(14, 165, 233, 0.1) !important;
+.Select-option.is-focused {
+    background-color: #0ea5e9 !important; 
+    color: white !important;
 }
